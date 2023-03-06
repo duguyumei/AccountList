@@ -1,0 +1,205 @@
+<!DOCTYPE html
+		PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	<script src="../../scripts/boot.js" type="text/javascript"></script>
+	<!--引入CSS-->
+	<link rel="stylesheet" type="text/css" href="../../res/third-party/webuploader/webuploader.css">
+	<style>
+		/*#upload-container, #upload-list{width: 500px; margin: 0 auto; }*/
+		/*#upload-container{cursor: pointer; border-radius: 15px; background: #EEEFFF; height: 200px;}*/
+		#upload-list{height: 300px; border: 1px solid #EEE; border-radius: 5px; margin-top: 10px; padding: 10px 20px;}
+		/*#upload-container>span{widows: 100%; text-align: center; color: gray; display: block; padding-top: 15%;}*/
+		.upload-item{margin-top: 5px; padding-bottom: 5px; border-bottom: 1px dashed gray;}
+		.percentage{height: 5px; background: green;}
+		.btn-delete, .btn-retry{cursor: pointer; color: red; float: right; margin-left: 20px ; display: none}
+		.btn-delete{ color: orange }
+		.btn-retry:hover{color: red;}
+
+
+		.loading {
+			width: 100%;
+			height: 100%;
+			position: fixed;
+			top: 0;
+			left: 0;
+			background: rgba(255, 255, 255, 0.6);
+			z-index: 10000;
+			text-align: center;
+			line-height: 100%;
+			display: none;
+		}
+
+		.loading span{
+			/*opacity:1;*/
+			width: 100%;
+			height: 100%;
+			margin-top: 150px;
+			font-size: 24px;
+			display:inline-block;
+			vertical-align:middle
+		}
+
+	</style>
+	<!--引入JS-->
+	<script type="text/javascript" src="../../res/third-party/jQuery/jquery-3.6.3.min.js"></script>
+	<script type="text/javascript" src="../../res/third-party/webuploader/webuploader.min.js"></script>
+</head>
+<body>
+	<div class="loading">
+	<!-- 这里是自由发挥的空间，可以用canvas或者img -->
+		<span>导入中....</span>
+	</div>
+	<div id="upload-container">
+		<a class="mini-button">点击或将文件拖拽至此上传</a>
+	</div>
+	<div id="upload-list">
+	<!-- <div class="upload-item">
+        <span>文件名：123</span>
+        <span data-file_id="" class="btn-delete">删除</span>
+        <span data-file_id="" class="btn-retry">重试</span>
+        <div class="percentage"></div>
+    </div> -->
+	</div>
+	<button id="picker" style="display: none;">点击上传文件</button>
+
+	<script type="text/javascript">
+		mini.parse();
+
+		$('#upload-container').click(function(event) {
+			$("#picker").find('input').click();
+		});
+		var uploader = WebUploader.create({
+			auto: true,// 选完文件后，是否自动上传。
+			swf: '../../res/third-party/webuploader/Uploader.swf',// swf文件路径
+			server: '/files/uploadFiles',// 文件接收服务端。
+			dnd: '#upload-container',
+			pick: '#picker',// 内部根据当前运行是创建，可能是input元素，也可能是flash. 这里是div的id
+			multiple: true, // 选择多个
+			chunked: true,// 开起分片上传。
+			threads: 1, // 上传并发数。允许同时最大上传进程数。
+			method: 'POST', // 文件上传方式，POST或者GET。
+			fileSizeLimit: 1024*1024*100*100, //验证文件总大小是否超出限制, 超出则不允许加入队列。
+			fileSingleSizeLimit: 1024*1024*100, //验证单个文件大小是否超出限制, 超出则不允许加入队列。
+			fileVal:'file', // [默认值：'file'] 设置文件上传域的name。
+			pick: '#picker',
+			// 只允许选择指定格式文件。
+			accept: {
+				title: '文件上传',
+				extensions: 'csv',
+				mimeTypes: 'text/csv'
+			}
+		});
+
+		uploader.on('beforeFileQueued',function onBeforeFileQueued(file) {
+			console.log("onBeforeFileQueued方法调用");
+			var fileName = file.name;
+			if (fileName.length > 50) {
+				mini.alert('文件名超出长度限制!');
+				return false;
+			}
+			if (file.size > 1024*1024*100) {
+				mini.alert(fileName + '此文件超过100M,请上传小于100M的文件!', {icon: 7});
+				return false;
+			}
+			//格式验证
+			var fileTypes = new Array("csv");
+			var fileTypeFlag = "0";
+			var newFileName = file.name.split('.');
+			newFileName = newFileName[newFileName.length - 1];
+			for (var i = 0; i < fileTypes.length; i++) {
+				if (fileTypes[i] == newFileName) {
+					fileTypeFlag = "1";
+					$("#fileType").val(fileTypes[i]);
+				}
+			}
+			if (fileTypeFlag == "0") {
+				var str = "";
+				for (var k = 0; k < fileTypes.length; k++) {
+					if (k > 0) {
+						str += "、" + fileTypes[k];
+					} else {
+						str += fileTypes[k];
+					}
+				}
+				mini.alert("请上传" + str + "格式文件！", {icon: 7});
+				return false;
+			}
+		});
+		/**
+		 * 文件是否被服务端接受
+		 */
+		function onUploadAccept(obj, ret){
+			console.log("执行onUploadAccept()");
+		}
+
+		uploader.on('fileQueued', function(file) {
+			// 选中文件时要做的事情，比如在页面中显示选中的文件并添加到文件列表，获取文件的大小，文件类型等
+			console.log("ext--"+file.ext+"size--"+file.size+"name--"+file.name)
+			var html = '<div class="upload-item">' +
+					'<span >文件名：'+file.name+'</span>' +
+					// ' &lt;span data-file_id="'+file.id+'" class="btn-delete">删除&lt;/span>' +
+					' <span data-file_id="'+file.id+'_error" class="btn-retry">上传失败请重试</span>' +
+					' <span data-file_id="'+file.id+'_success" class="btn-delete">已完成</span>' +
+					'<div class="percentage '+file.id+'" style="width: 0%;"></div>' +
+					'</div>';
+			$('#upload-list').append(html);
+		});
+
+
+		uploader.on('uploadProgress', function(file, percentage) {
+			// console.log(percentage * 100 + '%');
+			var width = $('.upload-item').width();
+			$('.'+file.id).width(width*percentage);
+		});
+
+		uploader.on('uploadSuccess', function(file, response) {
+			var res = mini.decode(response);
+			if (res.code == 200){
+				mini.alert(res.msg);
+			}
+			var sid = file.id+"_success";
+			var eid = file.id+"_error";
+			$("span[data-file_id='"+sid+"']").css("display", "inline-block");
+			$("span[data-file_id='"+eid+"']").css("display", "none");
+		});
+
+		uploader.on('uploadError', function(file,response ) {
+			console.log(response)
+			console.log(file.id+'upload error')
+			var sid = file.id+"_success";
+			var eid = file.id+"_error";
+			$("span[data-file_id='"+sid+"']").css("display", "inline-block");
+			$("span[data-file_id='"+eid+"']").css("display", "none");
+		});
+
+		// $('#upload-list').on('click', '.upload-item .btn-delete', function() {
+		// 	// 从文件队列中删除某个文件id
+		// 	file_id = $(this).data('file_id');
+		// 	// uploader.removeFile(file_id); // 标记文件状态为已取消
+		// 	uploader.removeFile(file_id, true); // 从queue中删除
+		// 	// console.log(uploader.getFiles());
+		// });
+
+		$('#upload-list').on('click', '.btn-retry', function() {
+			uploader.retry($(this).data('file_id'));
+		});
+
+
+		/**
+		 * 单个文件上传完成(不管成功或者失败，文件上传完成时触发)
+		 */
+		uploader.on('uploadComplete', function(file) {
+			console.log('uploadComplete'+uploader.getFiles());
+			$(".loading").hide();
+		});
+
+		// 执行文件块上传前
+		uploader.on('uploadBeforeSend', function onUploadBeforeSend(object, data, headers){
+			$(".loading").show();
+		})
+	</script>
+</body>
+</html>
+

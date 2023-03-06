@@ -1,0 +1,176 @@
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+    <script src="../../scripts/boot.js" type="text/javascript"></script>
+
+
+    <style type="text/css">
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            border: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+
+<form id="accountinfo" method="post">
+    <fieldset style="border:solid 1px #aaa;padding:3px;">
+        <legend>订单信息</legend>
+        <div style="padding:5px; text-align: right">
+            <table>
+                <tr>
+                    <td style="width:80px;">订单编号：</td>
+                    <td colspan="3">
+                        <input name="tradeguid" id="tradeguid" class="mini-textbox" enabled="false" style="width:386px;"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">商家编号：</td>
+                    <td colspan="3">
+                        <input name="merchantguid" id="merchantguid" class="mini-textbox" enabled="false" style="width:386px;"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">商家：</td>
+                    <td colspan="3">
+                        <input name="target" id="target" class="mini-textbox" style="width:386px;" readonly="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">商品名：</td>
+                    <td colspan="3">
+                        <input name="goods" class="mini-textbox" readonly="true" style="width:386px;"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">消费类别：</td>
+                    <td colspan="3">
+                        <input name="type" class="mini-textbox" readonly="true" style="width:386px;"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">金额：</td>
+                    <td style="width:150px;">
+                        <input name="money" class="mini-spinner" minValue="0.00" maxValue="999999999" format="n2"  readonly="true"/>
+                    </td>
+                    <td style="width:80px;">支付方式：</td>
+                    <td style="width:150px;">
+                        <input name="paytype" class="mini-textbox" readonly="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">收/支：</td>
+                    <td style="width:150px;" colspan="3">
+                        <input id="budget" name="budget" class="mini-radiobuttonlist" readonly="true"  style="width:386px;"
+                               repeatItems="3" textField="name" valueField="value"
+                               data="[{name:'支出',value:'支出'},{name:'收入',value:'收入'},{name:'其他',value:'其他'}]" />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">账单时间：</td>
+                    <td style="width:150px;">
+                        <input id="real_date" name="real_date" format="yyyy-MM-dd HH:mm" class="mini-datepicker" readonly="true" />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">账单来源：</td>
+                    <td style="width:150px;" colspan="3">
+                        <input id="source" name="source" class="mini-radiobuttonlist" textField="name" valueField="value"
+                               data="[{name:'支付宝',value:'ZFB'},{name:'微信',value:'WX'},{name:'手记',value:'SJ'}]"
+                               readonly="true" />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">订单状态：</td>
+                    <td style="width:150px;">
+                        <input name="status" class="mini-textbox"  readonly="true"/>
+                    </td>
+                    <td style="width:80px;">金额状态：</td>
+                    <td style="width:150px;">
+                        <input name="money_status" class="mini-textbox"  readonly="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">备注：</td>
+                    <td colspan="3">
+                        <input name="remark" class="mini-textbox" style="width:386px;" readonly="true"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">入库时间：</td>
+                    <td style="width:150px;">
+                        <input id="import_date" name="import_date" format="yyyy-MM-dd HH:mm" class="mini-datepicker"
+                               readonly="true"/>
+                    </td>
+                    <td style="width:80px;">更新时间：</td>
+                    <td style="width:150px;">
+                        <input id="update_date" name="update_date" format="yyyy-MM-dd HH:mm" class="mini-datepicker"
+                               readonly="true"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </fieldset>
+</form>
+<script type="text/javascript">
+    mini.parse();
+    var form = new mini.Form("accountinfo");
+    // var href = location.href;
+    // var dishGuid = href.split("?")[1].split("&")[0].split("=")[1];
+    var rowguid="";
+    var hasInit = false;
+
+    //对应上个页面的mini.open中的SetData() 函数，本页面的SetData()会自动执行，无需主动调用
+    function SetData(data) {
+        if (data.action == "show") {
+            data = mini.clone(data);
+            rowguid = data.id;
+            getData({
+                rowguid: data.id
+            });
+            // mini
+        }
+    }
+
+    //获取信息
+    function getData(data) {
+        if (!hasInit) {
+            $.ajax({
+                url: "/accountinfo/getAccountinfoByRowguid",
+                type: 'post',
+                data: data,
+                cache: false,
+                success: function (text) {
+                    var res = mini.decode(text);
+                    orgData = text.data;
+                    form.setData(text.data);
+                    form.setChanged(false);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseText);
+                    CloseWindow();
+                },
+                beforeSend:function(XHR){
+                    form.loading("请稍后...");
+                },
+                complete: function(XHR, TS){
+                    form.unmask();
+                }
+            });
+            hasInit = true;
+        }
+    }
+</script>
+</body>
+
+</html>

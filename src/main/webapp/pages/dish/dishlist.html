@@ -1,0 +1,187 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+  <script src="../../scripts/boot.js" type="text/javascript"></script>
+
+
+</head>
+
+<body>
+  <style type="text/css">
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+  <div class="mini-toolbar" style="padding:2px;border-bottom:0;">
+    <table style="width:100%;">
+      <tr>
+        <td style="width:100%;">
+          <a class="mini-button" iconCls="icon-add" onclick="addDish()">新增</a>
+          <a class="mini-button" iconCls="icon-add" onclick="openExcel()">excel导入</a>
+        </td>
+        <td style="white-space:nowrap;"><label style="font-family:Verdana;"></label>
+          <input id="dishName" class="mini-textbox" emptyText="请输入菜名" />
+          <a class="mini-button" iconCls="icon-search" onclick="onSearch()">查询</a>
+          <a class="mini-button" iconCls="icon-reload" onclick="onClear()">清空</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <!--撑满页面-->
+  <div class="mini-fit">
+
+    <div id="dishlist" class="mini-datagrid" style="width:100%;height:100%;" url="/accountinfo/getAccountinfo" idField="id"
+      sizeList="[5,10,20,50]" pageSize="10" sortField="real_date" sortOrder="desc">
+      <div property="columns">IAccountinfoService
+        <div type="indexcolumn" align="center" headerAlign="center">序</div>
+        <div field="rowguid" width="120" align="center" headerAlign="center">菜品编号</div>
+        <div field="import_date" width="120" align="center" headerAlign="center" dateFormat="yyyy-MM-dd hh:ss"
+             allowSort="true">菜名 </div>
+        <div field="real_date" width="100"  align="center" headerAlign="center"  dateFormat="yyyy-MM-dd hh:ss"
+             allowSort="true">菜品类别</div>
+        <div field="type" width="100" align="center" headerAlign="center" renderer="onMoneyRenderer" allowSort="true">
+          单价</div>
+        <div field="remark" width="100" headerAlign="center" align="center" renderer="onTakeRenderer">能否打包</div>
+        <div field="source" width="100" headerAlign="center" align="center">已出售数量</div>
+        <div field="money" width="100" allowSort="true" headerAlign="center" align="center"
+          dateFormat="yyyy-MM-dd">上市时间</div>
+        <div name="action" width="120" headerAlign="center" align="center" renderer="onActionRenderer"
+          cellStyle="padding:0;">操作</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="text/javascript">
+    mini.parse();
+    var grid = mini.get("dishlist");
+    grid.load();
+
+    function openExcel() {
+      mini.open({
+        url: "pages/account/fileaccount.html",
+        title: "导入账单信息", width: 600, height: 400,
+        ondestroy: function (action) {
+          grid.reload();
+        }
+      });
+    }
+
+    //操作按钮
+    function onActionRenderer(e) {
+      var s = ' <a class="mini-button" onclick="editDish(\'' + e.record.dishGuid + '\')">编辑</a>' 
+      + ' <a class="mini-button" onclick="deleteDish(\'' + e.record.dishGuid + '\')">删除</a>';
+      return s;
+    }
+    //新增菜品
+    function addDish() {
+      mini.open({
+        url: "pages/dish/dishAdd.html",
+        title: "新增菜品信息", width: 600, height: 400,
+        ondestroy: function (action) {
+
+          grid.reload();
+        }
+      });
+    }
+    //搜索
+    function onSearch() {
+      var dishName = mini.get("dishName").getValue();
+      grid.load({
+        dishName: dishName
+      });
+    }
+    //清空
+    function onClear() {
+      mini.get("dishName").setValue();
+      grid.load();
+    }
+    //处理种类
+    var dishtype = [
+      { "id": 1, "text": "川菜" },
+      { "id": 2, "text": "粤菜" },
+      { "id": 3, "text": "浙菜" },
+      { "id": 4, "text": "湘菜" },
+      { "id": 5, "text": "鲁菜" }
+    ];
+    function onTypeRenderer(e) {
+      for (var i = 0; i < dishtype.length; i++) {
+        var type = dishtype[i];
+        if (type.id == e.value) {
+          return type.text;
+        }
+      }
+      return "";
+    }
+    //处理单价
+    function onMoneyRenderer(e) {
+      var value = e.value;
+      if (value >= 35) {
+        // e.cellStyle = "color:red";
+        e.cellStyle = "background: yellow;color:red";
+      }
+      return e.cellHtml;
+    }
+    //处理外卖
+    function onTakeRenderer(e){
+      var text = "";
+      if(e.value == 1){
+        text = "能"
+      }else if(e.value == 2){
+        text = "不能"
+      }
+      return text;
+    }
+    //修改
+    function editDish(e){
+      mini.open({
+        url: "pages/dish/dishEdit.html?dishGuid=" + e,
+        title: "编辑菜品信息", width: 600, height: 400,
+        onload:function(){
+          var iframe = this.getIFrameEl();
+          var data = {
+            action : "edit",
+            id : e
+          };
+          iframe.contentWindow.SetData(data);
+        },
+        ondestroy: function (action) {
+          grid.reload();
+        }
+      });
+    }
+    //删除
+    function deleteDish(e){
+      $.ajax({
+        url: "../../dishlistaction",
+        type: 'post',
+        data: {
+          data: e,
+          method: "delete"
+        },
+        cache: false,
+        success: function (text) {
+          mini.alert("删除成功");
+          grid.reload();
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          alert(jqXHR.responseText);
+        }
+      });
+    }
+  </script>
+
+</body>
+
+</html>

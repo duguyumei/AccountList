@@ -1,0 +1,160 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+  <script src="../../scripts/boot.js" type="text/javascript"></script>
+
+
+  <style type="text/css">
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      border: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+
+  <form id="addDish" method="post">
+    <fieldset style="border:solid 1px #aaa;padding:3px;">
+      <legend>新增菜品信息</legend>
+      <div style="padding:5px;">
+        <table>
+          <tr>
+            <td style="width:80px;">菜品编号：</td>
+            <td style="width:150px;">
+              <input name="dishGuid" id="dishGuid" class="mini-textbox" required="true" enabled="false" />
+            </td>
+            <td style="width:80px;">菜名：</td>
+            <td style="width:150px;">
+              <input name="dishName" class="mini-textbox" required="true" />
+            </td>
+          </tr>
+          <tr>
+            <td style="width:80px;">菜品类别：</td>
+            <td style="width:150px;">
+              <input name="dishType" class="mini-combobox" style="width:150px;" emptyText="请选择..."
+                url="../../data/type.json" required="true" allowInput="false" />
+            </td>
+            <td style="width:80px;">单价：</td>
+            <td style="width:150px;">
+              <input name="salary" class="mini-spinner" minValue="0.01" maxValue="200" format="n2" required="true" />
+            </td>
+          </tr>
+          <tr>
+            <td style="width:80px;">能否打包：</td>
+            <td style="width:150px;">
+              <select name="isTake" class="mini-radiobuttonlist" value="1">
+                <option value="1">能</option>
+                <option value="2">不能</option>
+              </select>
+            </td>
+            <td style="width:80px;">上市时间：</td>
+            <td style="width:150px;">
+              <input name="createTime" class="mini-datepicker" required="true" allowInput="false"
+                ondrawdate="onDrawDate" />
+            </td>
+          </tr>
+          <tr>
+            <td style="width:80px;">备注：</td>
+            <td colspan="3">
+              <input name="remark" class="mini-textarea" style="width:386px;" />
+            </td>
+          </tr>
+        </table>
+      </div>
+    </fieldset>
+    <div style="text-align:center;padding:10px;">
+      <a class="mini-button" onclick="onOk" style="width:60px;margin-right:20px;">确定</a>
+      <a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+    </div>
+  </form>
+  <script type="text/javascript">
+    mini.parse();
+    var form = new mini.Form("addDish");
+
+    //获取dishguid
+    $.ajax({
+      url: "../../dishaddaction",
+      type: 'post',
+      data: {
+        method: "getGuid"
+      },
+      cache: false,
+      success: function (text) {
+        mini.get("dishGuid").setValue(text);
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        alert(jqXHR.responseText);
+        CloseWindow();
+      }
+    });
+
+    //禁止时间
+    function onDrawDate(e) {
+      var date = e.date;
+      var d = new Date();
+
+      if (date.getTime() >= d.getTime()) {
+        e.allowSelect = false;
+      }
+    }
+    //保存
+    function SaveData() {
+      var o = form.getData();
+
+      form.validate();
+      if (form.isValid() == false) return;
+
+      var json = mini.encode(o);
+      json.count = 0;
+      $.ajax({
+        url: "../../dishaddaction",
+        type: 'post',
+        data: { data: json },
+        cache: false,
+        success: function (text) {
+          var res = mini.decode(text);
+          if(res.code == -1){
+            mini.alert(res.msg);
+          }else{
+            CloseWindow("save");
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          alert(jqXHR.responseText);
+          CloseWindow();
+        }
+      });
+    }
+    function GetData() {
+      var o = form.getData();
+      return o;
+    }
+    function CloseWindow(action) {
+      if (action == "close" && form.isChanged()) {
+        if (confirm("数据被修改了，是否先保存？")) {
+          return false;
+        }
+      }
+      if (window.CloseOwnerWindow) return window.CloseOwnerWindow(action);
+      else window.close();
+    }
+    function onOk(e) {
+      SaveData();
+    }
+    function onCancel(e) {
+      CloseWindow("cancel");
+    }
+  </script>
+</body>
+
+</html>

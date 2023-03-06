@@ -1,0 +1,238 @@
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+  <script src="../../scripts/boot.js" type="text/javascript"></script>
+
+
+  <style type="text/css">
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      border: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+
+  <form id="accountinfo" method="post">
+    <fieldset style="border:solid 1px #aaa;">
+      <legend>订单信息</legend>
+      <div style="padding:5px; text-align: right">
+        <table>
+          <tr>
+            <td style="width:80px;">订单编号：</td>
+            <td colspan="3">
+              <input name="tradeguid" id="tradeguid" class="mini-textbox" required="true" enabled="false"
+                     style="width:386px;"/>
+            </td>
+          </tr>
+          <tr>
+            <td style="width:80px;">商家：</td>
+            <td colspan="3">
+              <input name="target" class="mini-textbox" required="true" style="width:386px;"/>
+            </td>
+          </tr>
+          <tr>
+            <td style="width:80px;">商品：</td>
+            <td colspan="3">
+              <input name="goods" class="mini-textbox" required="true" style="width:386px;"/>
+            </td>
+          </tr>
+          <tr>
+            <td style="width:80px;">消费类别：</td>
+            <td colspan="3">
+              <input name="type" class="mini-textbox" required="true" style="width:386px;"/>
+            </td>
+          </tr>
+          <tr>
+            <td style="width:80px;">金额：</td>
+            <td style="width:150px;">
+              <input name="money" class="mini-spinner" minValue="0.00" maxValue="999999999" format="n2" required="true" />
+            </td>
+            <td style="width:80px;">支付方式：</td>
+            <td style="width:150px;">
+              <input name="paytype" class="mini-textbox" required="true"/>
+            </td>
+          </tr>
+          <tr>
+            <td style="width:80px;">收/支：</td>
+            <td style="width:150px;" colspan="3">
+              <input id="budget" name="budget" class="mini-radiobuttonlist" required="true"  style="width:386px;"
+                     repeatItems="3" value="支出" textField="name" valueField="value"
+                     data="[{name:'支出',value:'支出'},{name:'收入',value:'收入'},{name:'其他',value:'其他'}]" />
+            </td>
+          </tr>
+          <tr>
+            <td style="width:80px;">账单时间：</td>
+            <td style="width:150px;">
+              <input id="real_date" name="real_date" format="yyyy-MM-dd HH:mm" showTime="true" class="mini-datepicker"
+                     required="true" allowInput="false"/>
+            </td>
+          </tr>
+          <tr>
+            <td style="width:80px;">订单状态：</td>
+            <td style="width:150px;">
+              <input name="status" class="mini-textbox" required="true" />
+            </td>
+            <td style="width:80px;">金额状态：</td>
+            <td style="width:150px;">
+              <input name="money_status" class="mini-textbox" />
+            </td>
+          </tr>
+          <tr>
+            <td style="width:80px;">备注：</td>
+            <td colspan="3">
+              <input name="remark" class="mini-textarea" style="width:386px;" />
+            </td>
+          </tr>
+        </table>
+      </div>
+    </fieldset>
+    <div style="text-align:center;padding:10px;">
+      <a class="mini-button" onclick="onOk" style="width:60px;margin-right:20px;">确定</a>
+      <a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+    </div>
+  </form>
+  <script type="text/javascript">
+    mini.parse();
+    var form = new mini.Form("accountinfo");
+    // var href = location.href;
+    // var dishGuid = href.split("?")[1].split("&")[0].split("=")[1];
+    var rowguid="";
+    var hasInit = false;
+    var orgData;
+
+    //对应上个页面的mini.open中的SetData() 函数，本页面的SetData()会自动执行，无需主动调用
+    function SetData(data) {
+      if (data.action == "edit") {
+        data = mini.clone(data);
+        rowguid = data.id;
+        getEditData({
+          rowguid: data.id
+        });
+      }
+    }
+
+    //获取信息
+    function getEditData(data) {
+      if (!hasInit) {
+        $.ajax({
+          url: "/accountinfo/getAccountinfoByRowguid",
+          type: 'post',
+          data: data,
+          cache: false,
+          success: function (text) {
+            var res = mini.decode(text);
+            orgData = text.data;
+            form.setData(text.data);
+            form.setChanged(false);
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            alert(jqXHR.responseText);
+            CloseWindow();
+          },
+          beforeSend:function(XHR){
+            form.loading("请稍后...");
+          },
+          complete: function(XHR, TS){
+            form.unmask();
+          }
+        });
+        hasInit = true;
+      }
+    }
+
+    //保存
+    function SaveData() {
+      form.validate();
+      if (form.isValid() == false) return;
+
+      var o = form.getData();
+      o = buquanData(o);
+      // var json = mini.encode(o);
+      // json.count = 0;
+      var json = JSON.stringify(o);
+      $.ajax({
+        url: "/accountinfo/editInfo",
+        type: 'post',
+        headers:{
+          "Content-Type":"application/json; charset=utf-8"
+        },
+        data: json,
+        cache: false,
+        success: function (text) {
+          var res = mini.decode(text);
+          if(res.code != 200){
+            mini.alert(res.msg);
+          }else{
+            CloseWindow("save");
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          alert(jqXHR.responseText);
+          CloseWindow();
+        },
+        beforeSend:function(XHR){
+          form.loading("请稍后...");
+        },
+        complete: function(XHR, TS){
+          form.unmask();
+        }
+      });
+    }
+    
+    // 补全数据
+    function buquanData(o) {
+      for(var key in orgData){
+        if (orgData[key] != null  && orgData[key] != undefined){
+          if (o[key] == undefined){
+              o[key] = orgData[key];
+          }
+        }
+      }
+      var real_date = mini.get("real_date").getFormValue().trim();
+      o["real_date"] = real_date;
+      return o;
+    }
+    // //禁止时间
+    // function onDrawDate(e) {
+    //   var date = e.date;
+    //   var d = new Date();
+    //
+    //   if (date.getTime() >= d.getTime()) {
+    //     e.allowSelect = false;
+    //   }
+    // }
+
+    function GetData() {
+      var o = form.getData();
+      return o;
+    }
+    function CloseWindow(action) {
+      if (action == "close" && form.isChanged()) {
+        if (confirm("数据被修改了，是否先保存？")) {
+          return false;
+        }
+      }
+      if (window.CloseOwnerWindow) return window.CloseOwnerWindow(action);
+      else window.close();
+    }
+    function onOk(e) {
+      SaveData();
+    }
+    function onCancel(e) {
+      CloseWindow("cancel");
+    }
+  </script>
+</body>
+
+</html>

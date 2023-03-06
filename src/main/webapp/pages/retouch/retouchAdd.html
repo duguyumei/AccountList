@@ -1,0 +1,253 @@
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+
+<!--    <script type="text/javascript" src="../../res/third-party/qs/qs.js"></script>-->
+    <script src="../../scripts/boot.js" type="text/javascript"></script>
+
+    <style type="text/css">
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            border: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        td{
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+<form id="addRetouch" method="post">
+    <fieldset style="border:solid 1px #aaa;padding:3px;">
+        <legend>新增个性化修饰</legend>
+        <div style="padding:5px;">
+            <table>
+                <tr>
+                    <td style="width:120px;">修饰行：</td>
+                    <td style="width:150px;">
+                        <input name="format_row" class="mini-combobox" style="width:150px;" emptyText="请选择..."
+                               textField="chinese_name" valueField="english_name" required="true" allowInput="false"
+                               url="/ziduan/getAccountRows" />
+                    </td>
+                    <td style="width:120px;">修饰值：</td>
+                    <td style="width:150px;">
+                        <input name="format_value" class="mini-textbox" required="true" />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">左侧类型：</td>
+                    <td style="width:150px;">
+                        <input name="type_left" id="type_left" class="mini-combobox" style="width:150px;"
+                               textField="name" valueField="value" required="true" allowInput="false" value="0"
+                               data="[{name:'固定值',value:'0'},{name:'账单字段',value:'1'}]" onvaluechanged="checktype(e,'left')"/>
+                    </td>
+                    <td style="width:80px;">左侧值：</td>
+                    <td style="width:150px;">
+                        <input name="tiaojian_left" id="left_1" class="mini-textbox" required="true" onvaluechanged="checkvalue(e,'left')"/>
+                        <input name="tiaojian_left" class="mini-combobox" style="width:150px;" emptyText="请选择..."
+                               textField="chinese_name" id="left_2" valueField="english_name" required="true" allowInput="false"
+                               url="/ziduan/getAccountRows" />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">运算符：</td>
+                    <td style="width:150px;">
+                        <input name="yunsuanfu"  class="mini-combobox" style="width:150px;"
+                               textField="name" valueField="value" required="true" allowInput="false"
+                               url="/retouchinfo/getyunsuanfu"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">右侧类型：</td>
+                    <td style="width:150px;">
+                        <input name="type_right" id="type_right" class="mini-combobox" style="width:150px;"
+                               textField="name" valueField="value" required="true" allowInput="false" value="0"
+                               data="[{name:'固定值',value:'0'},{name:'账单字段',value:'1'}]" onvaluechanged="checktype(e,'right')" />
+                    </td>
+                    <td style="width:80px;">右侧值：</td>
+                    <td style="width:150px;">
+                        <input id="right_1" name="tiaojian_right" class="mini-textbox" required="true" onvaluechanged="checkvalue(e,'right')"/>
+                        <input id="right_2" name="tiaojian_right" class="mini-combobox" style="width:150px;" emptyText="请选择..."
+                               textField="chinese_name" valueField="english_name" required="true" allowInput="false"
+                               url="/ziduan/getAccountRows" />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">分组：</td>
+                    <td style="width:150px;">
+                        <input id="retouchguid" name="retouchguid" class="mini-textbox"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">修改数据：</td>
+                    <td style="width:150px;">
+                        <input id="isreal" name="isreal" class="mini-radiobuttonlist" required="true"
+                               repeatItems="3" repeatLayout="table" value="0" onvaluechanged="checktype(e,'real')"
+                               textField="name" valueField="value" data="[{name:'是',value:'1'},{name:'否',value:'0'}]" />
+                    </td>
+                    <td style="width:80px;" id="ishistory1">修改历史数据：</td>
+                    <td style="width:150px;" id="ishistory2">
+                        <input id="ishistory" name="ishistory" class="mini-radiobuttonlist" required="true"
+                               repeatItems="3" repeatLayout="table" value="0"
+                               textField="name" valueField="value" data="[{name:'是',value:'1'},{name:'否',value:'0'}]" />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:80px;">是否启用：</td>
+                    <td style="width:150px;">
+                        <input id="status" name="status" class="mini-radiobuttonlist" required="true"
+                               repeatItems="3" repeatLayout="table" value="1"
+                               textField="name" valueField="value" data="[{name:'是',value:'1'},{name:'否',value:'0'}]" />
+                    </td>
+                </tr>
+<!--                <tr>-->
+<!--                    <td style="width:80px;">送餐地址：</td>-->
+<!--                    <td colspan="3">-->
+<!--                        <input name="yunsuanfu" class="mini-textarea" style="width:386px;" required="true"/>-->
+<!--                    </td>-->
+<!--                </tr>-->
+            </table>
+        </div>
+    </fieldset>
+    <div style="text-align:center;padding:10px;">
+        <a class="mini-button" onclick="onOk" style="width:60px;margin-right:20px;">确定</a>
+        <a class="mini-button" onclick="onCancel" style="width:60px;">取消</a>
+    </div>
+    <div style="position:absolute;left:10px;bottom:10px;">
+        <span>提示：</span>
+        <span>同一分组下的条件必须同时满足才会进行修饰！</span>
+    </div>
+</form>
+<script type="text/javascript">
+    mini.parse();
+    var form = new mini.Form("addRetouch");
+
+    // let qs = Qs;
+    $(function(){
+        $("#left_2").hide();
+        $("#right_2").hide();
+        $("#ishistory1").hide();
+        $("#ishistory2").hide();
+        // mini.get("type_left").setValue("0");
+        // mini.get("type_right").setValue("0");
+    });
+
+    // 调整类型
+    function checktype(e,f){
+        if ("left" == f){
+            // mini.get("left_1").setValue("");
+            // mini.get("left_2").setValue("");
+            if (e.value == 1){
+                mini.get("left_2").setValue("");
+                $("#left_1").hide();
+                $("#left_2").show();
+            }
+            else {
+                mini.get("left_1").setValue("");
+                $("#left_1").show();
+                $("#left_2").hide();
+            }
+
+        }
+        else if("right" == f){
+            // mini.get("right_1").setValue("");
+            // mini.get("right_2").setValue("");
+            if (e.value == 1){
+                mini.get("right_2").setValue("");
+                $("#right_1").hide();
+                $("#right_2").show();
+            }
+            else {
+                mini.get("right_1").setValue("");
+                $("#right_1").show();
+                $("#right_2").hide();
+            }
+        }
+        else if("real" == f){
+            if (e.value == 1){
+                $("#ishistory1").show();
+                $("#ishistory2").show();
+            }
+            else {
+                mini.get("ishistory").setValue("0");
+                $("#ishistory1").hide();
+                $("#ishistory2").hide();
+            }
+        }
+    }
+
+    function checkvalue(e,f){
+        if ("left" == f){
+            mini.get("left_2").setValue(e.value);
+        }
+        else if("right" == f){
+            mini.get("right_2").setValue(e.value);
+        }
+    }
+
+    //保存
+    function SaveData() {
+        var o = form.getData();
+
+        form.validate();
+        if (form.isValid() == false) return;
+
+        // var json = mini.encode(o);
+        // var json = mini.encode(qs.stringify(o));
+        // json.count = 0;
+        $.ajax({
+            url: "/retouchinfo/addRetouch",
+            type: 'post',
+            headers:{
+                "Content-Type":"application/json; charset=utf-8"
+            },
+            data: JSON.stringify(o),
+            cache: false,
+            success: function (text) {
+                var res = mini.decode(text);
+                if(res.code == -1){
+                    mini.alert(res.msg);
+                }
+                else if (res.code == "200"){
+                    mini.alert("新增成功！");
+                    CloseWindow("save");
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText);
+                CloseWindow();
+            }
+        });
+    }
+    function GetData() {
+        var o = form.getData();
+        return o;
+    }
+    function CloseWindow(action) {
+        if (action == "close" && form.isChanged()) {
+            if (confirm("数据被修改了，是否先保存？")) {
+                return false;
+            }
+        }
+        if (window.CloseOwnerWindow) return window.CloseOwnerWindow(action);
+        else window.close();
+    }
+    function onOk(e) {
+        SaveData();
+    }
+    function onCancel(e) {
+        CloseWindow("cancel");
+    }
+</script>
+</body>
+
+</html>

@@ -1,0 +1,10 @@
+[
+  {"id":"account","text":"账单管理","iconCls":"icon-node"},
+  {"id":"accountList","pid":"account","text":"账单列表","iconCls":"icon-folder","url":"pages/account/accountList.html"},
+  {"id":"retouchList","pid":"account","text":"个性化列表","iconCls":"icon-folder","url":"pages/retouch/retouchList.html"}
+//  {"id":"order","text":"订餐信息管理","iconCls":"icon-node"},
+//  {"id":"orderList","pid":"order","text":"订餐列表","iconCls":"icon-folder","url":"pages/order/orderlist.html"},
+//  {"id":"account","text":"账单详情","iconCls":"icon-node"},
+//  {"id":"accountList","pid":"account","text":"订餐列表123","iconCls":"icon-folder","url":"pages/account/accountList.html"},
+//  {"id":"dishList123","pid":"account","text":"菜品列表","iconCls":"icon-folder","url":"pages/order/orderlist.html"}
+]
