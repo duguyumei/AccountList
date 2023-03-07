@@ -1,218 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-
-    <script src="../../scripts/boot.js" type="text/javascript"></script>
-
     <title>登录</title>
-    <style>
-        body {
-            background: url('fileStroge/login_backgrouhd.jpg') no-repeat;
-            background-size: 100% 130%;
-        }
-
-        #login_box {
-            width: 20%;
-            height: 400px;
-            background-color: #00000060;
-            margin: auto;
-            margin-top: 10%;
-            text-align: center;
-            border-radius: 10px;
-            padding: 50px 50px;
-        }
-
-        /*h2 {*/
-        /*    color: #ffffff90;*/
-        /*    margin-top: 5%;*/
-        /*}*/
-
-        /*#input-box {*/
-        /*    margin-top: 5%;*/
-        /*}*/
-
-        /*span {*/
-        /*    color: #fff;*/
-        /*}*/
-
-        /*input {*/
-        /*    border: 0;*/
-        /*    width: 60%;*/
-        /*    font-size: 15px;*/
-        /*    color: #fff;*/
-        /*    background: transparent;*/
-        /*    border-bottom: 2px solid #fff;*/
-        /*    padding: 5px 10px;*/
-        /*    outline: none;*/
-        /*    margin-top: 10px;*/
-        /*}*/
-
-        /*button {*/
-        /*    margin-top: 50px;*/
-        /*    width: 60%;*/
-        /*    height: 30px;*/
-        /*    border-radius: 10px;*/
-        /*    border: 0;*/
-        /*    color: #fff;*/
-        /*    text-align: center;*/
-        /*    line-height: 30px;*/
-        /*    font-size: 15px;*/
-        /*    background-image: linear-gradient(to right, #30cfd0, #330867);*/
-        /*}*/
-
-        /*#sign_up {*/
-        /*    margin-top: 45%;*/
-        /*    margin-left: 60%;*/
-        /*}*/
-
-        /*a {*/
-        /*    color: #b94648;*/
-        /*}*/
-        .container {
-            height: 100%;
-            background-image: linear-gradient(to right, #fbc2eb, #a6c1ee);
-        }
-        .login-wrapper {
-            background-color: #fff;
-            width: 358px;
-            height: 388px;
-            border-radius: 15px;
-            padding: 0 50px;
-            position: relative;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-        }
-        .header {
-            font-size: 38px;
-            font-weight: bold;
-            text-align: center;
-            line-height: 100px;
-            padding-top: 30px;
-        }
-        .input-item {
-            display: block;
-            width: 100%;
-            margin-bottom: 20px;
-            border: 0;
-            padding: 10px;
-            border-bottom: 1px solid rgb(128, 125, 125);
-            font-size: 15px;
-            outline: none;
-        }
-        .input-item:placeholder {
-            text-transform: uppercase;
-        }
-        .btn {
-            text-align: center;
-            padding: 10px;
-            width: 100%;
-            margin-top: 40px;
-            background-image: linear-gradient(to right, #a6c1ee, #fbc2eb);
-            color: #fff;
-        }
-        .msg {
-            text-align: center;
-            line-height: 88px;
-        }
-        a {
-            text-decoration-line: none;
-            color: #abc1ee;
-        }
-    </style>
+    <!-- 引入 MiniUI 样式文件 -->
+<!--    <link rel="stylesheet" href="https://cdn.bootcss.com/miniui/3.6.3/miniui.min.css">-->
+<!--    <link rel="stylesheet" href="https://cdn.bootcss.com/miniui/3.6.3/themes/bootstrap/skin.css">-->
+    <!-- 引入 jQuery 库和 MiniUI 核心库 -->
+<!--    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>-->
+<!--    <script src="https://cdn.bootcss.com/miniui/3.6.3/miniui.min.js"></script>-->
+    <script src="scripts/boot.js" type="text/javascript"></script>
+    <script src="scripts/jquery.min.js" type="text/javascript"></script>
 </head>
-
 <body>
-<div id="login_box">
-    <div class="container">
-        <div class="login-wrapper">
-            <div class="header">Login</div>
-            <form id="userinfo" method="post" class="form-wrapper">
-                <table style="padding: 10px">
-                    <tr>
-                        <td width="">账号：</td>
-                        <td>
-                            <input type="text" class="mini-textbox" name="loginid"  required="true" placeholder="username"
-                                   style="width: 100%" /></td>
-                    </tr>
-                    <tr>
-                        <td width="">密码：</td>
-                        <td>
-                            <input type="password" class="mini-textbox"  name="password"  required="true" placeholder="password"
-                                   style="width: 100%"/>
-                        </td>
-                    </tr>
-                </table>
-                <div class="mini-button" style="width: 90%;margin-top: 20px" onclick="onOk">Login</div>
-            </form>
-            <div class="msg">
-                Don't have account?
-                <a href="#">Sign up</a>
-            </div>
-        </div>
+<div class="mini-panel" style="width: 300px; margin: 100px auto;">
+    <div class="mini-panel-header">登录</div>
+    <div class="mini-panel-body">
+        <form id="login-form" method="post">
+            <table>
+                <tr>
+                    <td>用户名：</td>
+                    <td><input class="mini-textbox" name="username" required></td>
+                </tr>
+                <tr>
+                    <td>密码：</td>
+                    <td><input class="mini-textbox" type="password" name="password" required></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <div class="mini-button" type="submit" value="登录" onclick="loginSubmit()">登录</div>
+<!--                        <input class="mini-button" type="button" value="取消" onclick="loginCancel()">-->
+                    </td>
+                </tr>
+            </table>
+        </form>
     </div>
 </div>
-
 <script type="text/javascript">
+    // 登录表单提交事件处理函数
     mini.parse();
-    var form = new mini.Form("userinfo");
-
-    //保存
-    function SaveData() {
+    var form = new mini.Form("#login-form");
+    function loginSubmit() {
         form.validate();
         if (form.isValid() == false) return;
-
-        var o = form.getData();
-        console.log(o)
-        // var real_date = mini.get("real_date").getFormValue().trim();
-        // o["real_date"] = real_date;
-        var json = JSON.stringify(o);
-        $.ajax({
-            url: "/user/login",
-            type: 'post',
-            headers:{
-                "Content-Type":"application/json; charset=utf-8"
-            },
-            data: json,
-            cache: false,
-            success: function (data, textStatus, xhr) {
-                // console.log(data)
-                // console.log(textStatus)
-                // console.log(xhr)
-                var res = mini.decode(data);
-                if(res.code != 200){
-                    alert(res.msg);
-                }else {
-                    // var session = xhr.getResponseHeader('Authorization');
-                    // console.log(session);
-                    // document.cookie = session;
-                    // window.location.href = '/';
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                alert(jqXHR.responseText);
-            },
-            beforeSend:function(XHR){
-                form.loading("登录中...");
-            },
-            complete: function(XHR, TS){
-                form.unmask();
-            }
-        });
+        // TODO: 在这里使用 AJAX 提交登录请求
     }
 
-
-    function GetData() {
-        var o = form.getData();
-        return o;
-    }
-
-    function onOk(e) {
-        SaveData();
-    }
-
+    // 取消按钮点击事件处理函数
+    // function loginCancel() {
+    //     // TODO: 在这里处理取消按钮的点击事件
+    // }
 </script>
 </body>
 </html>
