@@ -1,5 +1,6 @@
 package com.example.demo.common;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -10,28 +11,37 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.net.URLDecoder;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
 public class MyInterceptor implements HandlerInterceptor {
-    private Map<String, SessionInfo> sessionMap = null;
     private int sessionTimeout = 30 * 60 * 1000; // session超时时间，单位为毫秒
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (sessionMap == null){
-            sessionMap = new UserController().getSessionMap();
-        }
+        Map<String, SessionInfo> sessionMap = new UserController().getSessionMap();
         if (!"/login.html".equals(request.getRequestURI() )&& !"/user/login".equals(request.getRequestURI())){
-            String sessionId = request.getHeader("Authorization"); // 从请求头中获取Session ID
-            if (sessionId == null || sessionId.isEmpty()) {
-                sessionId = request.getParameter("Authorization"); // 从请求参数中获取Session ID
+            // 从请求头中获取Session ID
+            String sessionId = request.getHeader("Authorization");
+            if (CommonUtils.isBlank(sessionId)){
+                // 从cookies获取
+                Cookie[] cookies = request.getCookies();
+                if (cookies != null) {
+                    for (Cookie cookie : cookies) {
+                        if (cookie.getName().equals("Authorization")) {
+                            sessionId = URLDecoder.decode(cookie.getValue(), "UTF-8");
+                            break;
+                        }
+                    }
+                }
             }
             if (sessionId == null || sessionId.isEmpty()) {
                 response.sendRedirect("/login.html");
                 return false; // 没有Session ID，返回401 Unauthorized
             }
-            SessionInfo sessionInfo = sessionMap.get(CommonUtils.md5Hex(sessionId)); // 从内存中获取Session
+            sessionId = CommonUtils.decrypt(sessionId);
+            SessionInfo sessionInfo = sessionMap.get(sessionId); // 从内存中获取Session
             if (sessionInfo == null) {
                 response.sendRedirect("/login.html");
                 return false; // Session不存在，返回401 Unauthorized

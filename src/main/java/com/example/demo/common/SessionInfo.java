@@ -6,6 +6,7 @@ public class SessionInfo {
     private Long createTime;
     private User user;
 
+
     public Long getCreateTime() {
         return createTime;
     }

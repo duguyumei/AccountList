@@ -25,10 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class UserController {
     @Resource
     IUserService service;
-    @Autowired
-    private HttpSession session;
 
-    private Map<String, SessionInfo> sessionMap = new ConcurrentHashMap<>();
+    private static Map<String, SessionInfo> sessionMap = new ConcurrentHashMap<>();
 
     //登录
     @PostMapping("/login")
@@ -39,7 +37,12 @@ public class UserController {
             if (user.getPassword().equals(CommonUtils.md5Hex(info.getPassword()))){
                 result = Result.success("登录成功！");
                 String sessionId = UUID.randomUUID() + "--" + user.getRowguid();
-                String encryptedSessionId = CommonUtils.md5Hex(sessionId);
+                String encryptedSessionId = null;
+                try {
+                    encryptedSessionId = CommonUtils.encrypt(sessionId);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 SessionInfo sessionInfo = new SessionInfo();
                 sessionInfo.setUser(user);
                 sessionInfo.setCreateTime(System.currentTimeMillis());
@@ -59,11 +62,10 @@ public class UserController {
     // 注销登录
     @RequestMapping("/logout")
     public String logout(@RequestBody User info){
-        session.removeAttribute("username");
         return "login";
     }
 
-    public Map<String, SessionInfo> getSessionMap(){
+    public static Map<String, SessionInfo> getSessionMap(){
         return sessionMap;
     }
 }
