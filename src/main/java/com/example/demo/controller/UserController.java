@@ -7,15 +7,12 @@ package com.example.demo.controller;
 import com.example.demo.common.CommonUtils;
 import com.example.demo.common.Result;
 import com.example.demo.common.SessionInfo;
-import com.example.demo.common.TokenUtils;
 import com.example.demo.entity.User;
 import com.example.demo.service.IUserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,6 +24,7 @@ public class UserController {
     IUserService service;
 
     private static Map<String, SessionInfo> sessionMap = new ConcurrentHashMap<>();
+
 
     //登录
     @PostMapping("/login")
@@ -68,4 +66,5 @@ public class UserController {
     public static Map<String, SessionInfo> getSessionMap(){
         return sessionMap;
     }
+
 }
