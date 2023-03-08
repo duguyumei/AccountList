@@ -168,38 +168,42 @@
         if (form.isValid() == false) return;
 
         var o = form.getData();
-        console.log(o)
-        // var real_date = mini.get("real_date").getFormValue().trim();
-        // o["real_date"] = real_date;
         var json = JSON.stringify(o);
         $.ajax({
             url: "/user/login",
             type: 'post',
             headers:{
-                "Content-Type":"application/json; charset=utf-8"
+                "Content-Type":"application/json; charset=utf-8",
+                'Authorization':'456'
             },
             data: json,
             cache: false,
+            beforeSend:function(request){
+                form.loading("登录中...");
+                if (localStorage.getItem("Authorization")){
+                    request.setRequestHeader("Authorization",localStorage.getItem("Authorization"));
+                }
+            },
             success: function (data, textStatus, xhr) {
-
-                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                    // 获取响应头中Authorization字段的值
-                    var authorization = xhr.getResponseHeader('Authorization');
-                    var res = mini.decode(data);
-                    if(res.code != 200){
-                        alert(res.msg);
-                    }else {
-                        document.cookie = 'Authorization=' + encodeURIComponent(authorization);
-                        window.location.href = '/';
-                    }
+                var res = mini.decode(data);
+                if(res.code != 200){
+                    alert(res.msg);
+                }else {
+                    var authorization = res.data;
+                    localStorage.setItem("Authorization",authorization)
+                    // 在跳转页面之前将token放入请求头中
+                    $.ajaxSetup({
+                        headers:{
+                            'Authorization':localStorage.getItem("Authorization")
+                        }
+                    });
+                    location.href = '/'
                 }
 
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert(jqXHR.responseText);
-            },
-            beforeSend:function(XHR){
-                form.loading("登录中...");
+                form.unmask();
             },
             complete: function(XHR, TS){
                 form.unmask();

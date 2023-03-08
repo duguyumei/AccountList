@@ -4,7 +4,9 @@ package com.example.demo.controller;
  ** @date 2022/3/22
  */
 
+import com.alibaba.fastjson.JSON;
 import com.example.demo.common.CommonUtils;
+import com.example.demo.common.JWTUtils;
 import com.example.demo.common.Result;
 import com.example.demo.common.SessionInfo;
 import com.example.demo.entity.User;
@@ -23,9 +25,6 @@ public class UserController {
     @Resource
     IUserService service;
 
-    private static Map<String, SessionInfo> sessionMap = new ConcurrentHashMap<>();
-
-
     //登录
     @PostMapping("/login")
     public Result<?> loginUser(@RequestBody User info, HttpServletResponse response){
@@ -33,19 +32,12 @@ public class UserController {
         Result result = null;
         if (user != null && !CommonUtils.isBlank(user.getRowguid())){
             if (user.getPassword().equals(CommonUtils.md5Hex(info.getPassword()))){
+                User _user = new User();
+                _user.setRowguid(user.getRowguid());
+                _user.setDispalyname(user.getDispalyname());
+                String jwt = JWTUtils.createJWT(UUID.randomUUID().toString(), JSON.toJSONString(_user),0);
                 result = Result.success("登录成功！");
-                String sessionId = UUID.randomUUID() + "--" + user.getRowguid();
-                String encryptedSessionId = null;
-                try {
-                    encryptedSessionId = CommonUtils.encrypt(sessionId);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                SessionInfo sessionInfo = new SessionInfo();
-                sessionInfo.setUser(user);
-                sessionInfo.setCreateTime(System.currentTimeMillis());
-                sessionMap.put(sessionId,sessionInfo);
-                response.setHeader("Authorization", encryptedSessionId);
+                result.setData(jwt);
             }
             else {
                 result = Result.error("500","密码错误");
@@ -61,10 +53,6 @@ public class UserController {
     @RequestMapping("/logout")
     public String logout(@RequestBody User info){
         return "login";
-    }
-
-    public static Map<String, SessionInfo> getSessionMap(){
-        return sessionMap;
     }
 
 }

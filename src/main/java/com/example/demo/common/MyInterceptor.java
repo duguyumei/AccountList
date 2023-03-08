@@ -20,47 +20,22 @@ public class MyInterceptor implements HandlerInterceptor {
     private int sessionTimeout = 30 * 60 * 1000; // session超时时间，单位为毫秒
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        Map<String, SessionInfo> sessionMap = new UserController().getSessionMap();
         if (!"/login.html".equals(request.getRequestURI() )&& !"/user/login".equals(request.getRequestURI())){
-            // 从请求头中获取Session ID
-            String sessionId = request.getHeader("Authorization");
-            if (CommonUtils.isBlank(sessionId)){
-                // 从cookies获取
-                Cookie[] cookies = request.getCookies();
-                if (cookies != null) {
-                    for (Cookie cookie : cookies) {
-                        if (cookie.getName().equals("Authorization")) {
-                            sessionId = URLDecoder.decode(cookie.getValue(), "UTF-8");
-                            break;
-                        }
-                    }
-                }
+            // 获取token
+            String token = request.getHeader("Authorization");
+            if (token == null || token.isEmpty()) {
+                token = request.getParameter("Authorization");
             }
-            if (sessionId == null || sessionId.isEmpty()) {
+            if (token == null || token.isEmpty()) {
                 response.sendRedirect("/login.html");
                 return false; // 没有Session ID，返回401 Unauthorized
             }
-            sessionId = CommonUtils.decrypt(sessionId);
-            SessionInfo sessionInfo = sessionMap.get(sessionId); // 从内存中获取Session
-            if (sessionInfo == null) {
+            Result result = JWTUtils.validateJWT(token);
+            if (!"200".equals(result.getCode())) {
+                System.out.println(token);
                 response.sendRedirect("/login.html");
                 return false; // Session不存在，返回401 Unauthorized
             }
-            long currentTime = System.currentTimeMillis();
-            if (sessionInfo.getCreateTime() + sessionTimeout < currentTime) {
-                sessionMap.remove(sessionId); // Session超时，从内存中移除
-                response.sendRedirect("/login.html");
-                return false; // Session超时，返回401 Unauthorized
-            }
-//            String checksum = sessionInfo.getChecksum();
-//            String username = sessionInfo.getUsername();
-//            String password = sessionInfo.getPassword();
-//            String calculatedChecksum = calculateChecksum(sessionId, username, password); // 计算校验码
-//            if (!checksum.equals(calculatedChecksum)) {
-//                sessionMap.remove(sessionId); // 校验码不正确，从内存中移除
-//                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//                return false; // 校验码不正确，返回401 Unauthorized
-//            }
         }
         return true;
     }
